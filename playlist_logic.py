@@ -61,22 +61,30 @@ def classify_song(song: Song, profile: Dict[str, object]) -> str:
     """Return a mood label given a song and user profile."""
     energy = song.get("energy", 0)
     genre = song.get("genre", "")
-    title = song.get("title", "")
 
     hype_min_energy = profile.get("hype_min_energy", 7)
     chill_max_energy = profile.get("chill_max_energy", 3)
     favorite_genre = profile.get("favorite_genre", "")
 
-    hype_keywords = ["rock", "punk", "party"]
-    chill_keywords = ["lofi", "ambient", "sleep"]
+    hype_genre_keywords = ["rock", "punk", "party"]
+    chill_genre_keywords = ["lofi", "ambient", "sleep"]
 
-    is_hype_keyword = any(k in genre for k in hype_keywords)
-    is_chill_keyword = any(k in title for k in chill_keywords)
-
-    if genre == favorite_genre or energy >= hype_min_energy or is_hype_keyword:
+    # A song is Hype if it's the user's favorite genre, is high-energy,
+    # or its genre contains a hype keyword.
+    is_favorite_genre = genre == favorite_genre
+    is_high_energy = energy >= hype_min_energy
+    has_hype_genre = any(keyword in genre for keyword in hype_genre_keywords)
+    if is_favorite_genre or is_high_energy or has_hype_genre:
         return "Hype"
-    if energy <= chill_max_energy or is_chill_keyword:
+
+    # Otherwise it's Chill if it's low-energy or its genre contains a
+    # chill keyword.
+    is_low_energy = energy <= chill_max_energy
+    has_chill_genre = any(keyword in genre for keyword in chill_genre_keywords)
+    if is_low_energy or has_chill_genre:
         return "Chill"
+
+    # Anything in between is Mixed.
     return "Mixed"
 
 
